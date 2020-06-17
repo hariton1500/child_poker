@@ -2,18 +2,6 @@
   "configVersion": 2,
   "packages": [
     {
-      "name": "archive",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/archive-2.0.13",
-      "packageUri": "lib/",
-      "languageVersion": "2.0"
-    },
-    {
-      "name": "args",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/args-1.6.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.3"
-    },
-    {
       "name": "async",
       "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/async-2.4.1",
       "packageUri": "lib/",
@@ -32,28 +20,28 @@
       "languageVersion": "2.0"
     },
     {
+      "name": "clock",
+      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/clock-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
       "name": "collection",
       "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/collection-1.14.12",
       "packageUri": "lib/",
       "languageVersion": "2.0"
     },
     {
-      "name": "convert",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/convert-2.1.1",
-      "packageUri": "lib/",
-      "languageVersion": "1.17"
-    },
-    {
-      "name": "crypto",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/crypto-2.1.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.1"
-    },
-    {
       "name": "cupertino_icons",
       "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/cupertino_icons-0.1.3",
       "packageUri": "lib/",
       "languageVersion": "2.0"
+    },
+    {
+      "name": "fake_async",
+      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/fake_async-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.2"
     },
     {
       "name": "flutter",
@@ -68,8 +56,14 @@
       "languageVersion": "2.2"
     },
     {
-      "name": "image",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/image-2.1.12",
+      "name": "flutter_web_plugins",
+      "rootUri": "file:///Users/hariton/Downloads/flutter/packages/flutter_web_plugins",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
+      "name": "fluttertoast",
+      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/fluttertoast-4.0.1",
       "packageUri": "lib/",
       "languageVersion": "2.0"
     },
@@ -87,19 +81,7 @@
     },
     {
       "name": "path",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/path-1.6.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.0"
-    },
-    {
-      "name": "petitparser",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/petitparser-2.4.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.4"
-    },
-    {
-      "name": "quiver",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/quiver-2.1.3",
+      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/path-1.7.0",
       "packageUri": "lib/",
       "languageVersion": "2.0"
     },
@@ -158,25 +140,13 @@
       "languageVersion": "2.0"
     },
     {
-      "name": "web_socket_channel",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/web_socket_channel-1.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.0"
-    },
-    {
-      "name": "xml",
-      "rootUri": "file:///Users/hariton/.pub-cache/hosted/pub.dartlang.org/xml-3.6.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.6"
-    },
-    {
-      "name": "childpoker",
+      "name": "childbridge",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "2.7"
     }
   ],
-  "generated": "2020-05-04T11:21:27.036371Z",
+  "generated": "2020-05-27T12:53:59.041896Z",
   "generator": "pub",
-  "generatorVersion": "2.8.1"
+  "generatorVersion": "2.9.0-8.2.beta"
 }

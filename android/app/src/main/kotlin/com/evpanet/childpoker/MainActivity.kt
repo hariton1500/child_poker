@@ -1,4 +1,4 @@
-package com.evpanet.childpoker
+package com.evpanet.childbridge
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,5 @@
+import 'package:childbridge/authorize.dart';
 import 'package:flutter/material.dart';
-import 'loginscreen.dart';
 
 void main() => runApp(new MyApp());
 
@@ -8,11 +8,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Детский покер',
+      title: 'Детский бридж',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new StartPage(),
+      home: LoginPage('', null, null),
     );
   }
 }
