@@ -5,6 +5,7 @@ import 'package:childbridge/endofgame.dart';
 import 'package:childbridge/unoclient.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'bridgehelpers.dart';
 
 class GamePage extends StatefulWidget {
 
@@ -36,43 +37,15 @@ class _GamePageState extends State<GamePage> {
   bool isMyMove = false, isNoCardsToMove = false, isEndOfGame = false;
   int scoreOfGame = 0;
   Map<String, int> scoreMap = {};
+  Size deviceSize;
 
   @override
   void initState() {
     print('game:init');
+    super.initState();
     widget.subscription.onData((data) {handleMsg(data);});
     print('1sending: ${{'type' : 'inGame', 'gameType' : 'getMyCardsAndInitMove', 'name' : widget.player, 'gameName' : widget.gameName}}');
-    widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'getMyCardsAndInitMove', 'name' : widget.player, 'gameName' : widget.gameName}));
-    super.initState();
-  }
-
-  bool checkForCardsToMove() {
-    print('Check for cards to move');
-    bool _answer = false;
-    if (game.mastLimit.isNotEmpty) {
-      print('mode is Mast Limit ${game.mastLimit}');
-      game.myCards.forEach((_card) {
-        if (game.mastOf(_card) == game.mastLimit) {print('card $_card is accaptable'); _answer = true;}
-        if (game.dostOf(_card) == 'В') {print('card $_card is accaptable'); _answer = true;}
-      });
-    }
-    if (game.dostLimit.isNotEmpty) {
-      print('mode is Dost Limit ${game.dostLimit}');
-      game.myCards.forEach((_card) {
-        if (game.dostOf(_card) == game.dostLimit) {print('card $_card is accaptable'); _answer = true;}
-        //if (game.dostOf(_card) == 'В') {print('card $_card is accaptable'); _answer = true;}
-      });
-    }
-    if (game.dostLimit.isEmpty && game.mastLimit.isEmpty) {
-      print('mode is No Limit. Heap is ${game.heapCards.last}');
-      game.myCards.forEach((_card) {
-        if (game.dostOf(_card) == game.dostOf(game.heapCards.last)) {print('card $_card is accaptable'); _answer = true;}
-        if (game.mastOf(_card) == game.mastOf(game.heapCards.last)) {print('card $_card is accaptable'); _answer = true;}
-        if (game.dostOf(_card) == 'В' && game.mastOf(_card) != game.mastOf(game.heapCards.last)) {print('card $_card is accaptable'); _answer = true;}
-      });
-    }
-    print('Answer is : $_answer');
-    return _answer;
+    Timer(Duration(seconds: 1), () => widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'getMyCardsAndInitMove', 'name' : widget.player, 'gameName' : widget.gameName})));
   }
 
   void handleMsg(List<int> data) {
@@ -102,9 +75,15 @@ class _GamePageState extends State<GamePage> {
                 });
                 Map<String, dynamic> _coPs = json.decode(msg['coPlayers']);
                 _coPs.forEach((key, value) {
-                  game.cardsCoPlayers[key] = value;
-                  print('$key have $value cards');
+                  print('$key: $value');
+                  game.cardsCoPlayers[key] = [];
+                  value.forEach((dynamic _card){
+                    print(_card);
+                    game.cardsCoPlayers[key].add(_card.toString());
+                  });
                 });
+                print(game.cardsCoPlayers);
+                setState(() {});
                 print('2sending: ${{'type' : 'inGame', 'gameType' : 'whatNextFirst?', 'name' : widget.player, 'gameName' : widget.gameName}}');
                 widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'whatNextFirst?', 'name' : widget.player, 'gameName' : widget.gameName}));
                 break;
@@ -124,8 +103,7 @@ class _GamePageState extends State<GamePage> {
                   isMyMove = true;
                   moveMode = 'addCardByMast';
                   moverName = widget.player;
-                  if (checkForCardsToMove()) isNoCardsToMove = !true; else isNoCardsToMove = !false;
-                  //if (game.myCards.any((element) => game.mastOf(element) != game.mastLimit || game.dostOf(element) != 'В')) isNoCardsToMove = true; else isNoCardsToMove = false;
+                  if (ChildBridge(game).checkForCardsToMove()) isNoCardsToMove = !true; else isNoCardsToMove = !false;
                 });
                 break;
               case 'moverIs':
@@ -139,7 +117,7 @@ class _GamePageState extends State<GamePage> {
                       game.dostLimit = '';
                     }
                     //проверка на наличие карт для хода
-                    if (checkForCardsToMove()) {
+                    if (ChildBridge(game).checkForCardsToMove()) {
                       print('I have cards to move');
                       isNoCardsToMove = false;
                     } else {
@@ -160,29 +138,42 @@ class _GamePageState extends State<GamePage> {
                 json.decode(msg['cards']).forEach((card) {
                   game.myCards.add(card.toString());
                 });
-                setState(() {isNoCardsToMove = !checkForCardsToMove();});
+                setState(() {isNoCardsToMove = !ChildBridge(game).checkForCardsToMove();});
                 break;
               //{'type' : 'inGame', 'typeMove': 'addCardsToCoPlayer', 'name' : _to, 'cardsNumber' : _cardsNumber.toString()}
               case 'addCardsToCoPlayer':
                 if (msg['name'] != widget.player) {
                   setState(() {
                     moverName = msg['name'];
-                    game.cardsCoPlayers[msg['name']] += int.parse(msg['cardsNumber']);
+                    //game.cardsCoPlayers[msg['name']] += int.parse(msg['cardsNumber']);
+                    print('adding ${msg['cards']} to $moverName');
+                    json.decode(msg['cards']).forEach((_card){
+                      game.cardsCoPlayers[msg['name']].add(_card.toString());
+                    });
                   });
                 }
                 break;
               case 'playerPlacedCard':
                 //{'type' : 'inGame', 'typeMove': 'playerPlacedCard', 'name' : _name, 'card' : _card}
                 if (msg['name'] != widget.player) {
-                  setState(() {
-                    moverName = msg['name'];
-                    game.heapCards.add(msg['card']);
-                    game.cardsCoPlayers[msg['name']] -= 1;
-                  });
+                  moverName = msg['name'];
+                  String _card = msg['card'];
+                  game.baseCards.add(game.heapCards.last);
+                  game.heapCards = [_card];
+                  //game.heapCards.add(msg['card']);
+                  //game.cardsCoPlayers[msg['name']] -= 1;
+                  game.cardsCoPlayers[msg['name']].remove(_card);
+                  setState(() {});
                 }
                 break;
               case 'winner':
                 //{'type' : 'inGame', 'typeMove' : 'winner', 'winnerName' : _winner, 'scoreMap' : json.encode(scoreMap[_game.name])}
+                game.heapCards = [];
+                game.myCards = [];
+                game.cardsCoPlayers.forEach((player, cards) {
+                  game.cardsCoPlayers[player] = [];
+                });
+                setState(() {});
                 if (msg['winnerName'] == widget.player) {
                   scoreOfGame = 0;
                   print(msg['scoreMap']);
@@ -191,7 +182,7 @@ class _GamePageState extends State<GamePage> {
                     print('$_player: $_int');
                     scoreMap[_player] = int.parse(_int.toString());
                   });
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){return EndOfGamePage(player: widget.player, subscription: widget.subscription, socket: widget.socket, winner: msg['winnerName'], gameName: widget.gameName, score: scoreOfGame, scoreMap: scoreMap);}));
+                  Timer(Duration(milliseconds: 1000), () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){return EndOfGamePage(player: widget.player, subscription: widget.subscription, socket: widget.socket, winner: msg['winnerName'], gameName: widget.gameName, score: scoreOfGame, scoreMap: scoreMap);})));
                 } else {
                   print(msg['scoreMap']);
                   Map<String, dynamic> _scoreMap = json.decode(msg['scoreMap']);
@@ -200,7 +191,7 @@ class _GamePageState extends State<GamePage> {
                     if (_player == widget.player) scoreOfGame = int.parse(_int.toString());
                   });
                   //scoreOfGame = int.parse(msg['scoreMap'][widget.player].toString());
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){return EndOfGamePage(player: widget.player, subscription: widget.subscription, socket: widget.socket, winner: msg['winnerName'], gameName: widget.gameName, score: scoreOfGame, scoreMap: scoreMap);}));
+                  Timer(Duration(milliseconds: 1000), () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){return EndOfGamePage(player: widget.player, subscription: widget.subscription, socket: widget.socket, winner: msg['winnerName'], gameName: widget.gameName, score: scoreOfGame, scoreMap: scoreMap);})));
                 }
                 break;
               default:
@@ -218,13 +209,12 @@ class _GamePageState extends State<GamePage> {
   @override
   Widget build(BuildContext context) {
     print('game:build');
+    deviceSize = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: _canExit,
       child: Scaffold(
         key: state,
         bottomSheet: FlatButton(
-          //color: Colors.blue,
-          //padding: EdgeInsetsGeometry.lerp(a, b, t),
           textColor: Colors.green,
           onPressed: isMyMove && game.myMove.isNotEmpty ? () {
             print('My move is: ${game.myMove}');
@@ -299,264 +289,292 @@ class _GamePageState extends State<GamePage> {
         ),
         backgroundColor: Colors.lightBlue[300],
         appBar: AppBar(
-          //leading: Icon(Icons.filter_center_focus),
           title: Text(widget.player),
           elevation: 5,
           centerTitle: true,
           backgroundColor: isMyMove ? Colors.green : Colors.red,
         ),
-        body: Column(
-          children: <Widget>[
-            Flexible(
-              flex: 3,
-              //fit: FlexFit.tight,
-              child: Container(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: _listCoPlayers(),
-                ),
-              ),
-            ),
-            Flexible(
-              flex: 3,
-              fit: FlexFit.tight,
-              child: Container(
-                alignment: Alignment.center,
-                child: Wrap(
-                  spacing: 10,
-                  children: <Widget>[
-                    game.mastLimit.isNotEmpty ?
-                    Container(
-                      //alignment: Alignment.center,
-                      width: 60,
-                      height: 60,
-                      child: Image(image: AssetImage('assets/mast${game.mastList.indexOf(game.mastLimit)}.png'),),
-                    ) : Container(width: 1, height: 1,),
-                    DragTarget<String>(
-                      onWillAccept: (card){
-                        switch (moveMode) {
-                          case 'addCardByDost':
-                            return (game.dostOf(card) == game.dostLimit);
-                            break;
-                          case 'addCardByMast':
-                            return (game.mastOf(card) == game.mastLimit || game.dostOf(card) == 'В');
-                          default:
-                            return (game.dostOf(card) == game.dostOf(game.heapCards.last) || game.mastOf(card) == game.mastOf(game.heapCards.last) || game.dostOf(card) == 'В');
-                        }
-                      },
-                      onAccept: (String card){
-                        setState(() {
-                          game.myMove.add(card);
-                          game.heapCards.add(card);
-                          print('8sending...');
-                          widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'addHeap', 'heap' : game.heapCards.last, 'name' : widget.player, 'gameName' : widget.gameName}));
-                          game.myCards.remove(card);
-                          moveMode = 'addCardByDost';
-                          game.dostLimit = game.dostOf(game.heapCards.last);
-                          game.mastLimit = '';
-                          if (!checkForCardsToMove()) {
-                            print('Ending move by auto');
-                            game.mastLimit = '';
-                            game.dostLimit = '';
-                            if (game.dostOf(game.myMove.last) == 'В') {
-                              var dialog = CupertinoAlertDialog(
-                                title: Text('Выберите масть'),
-                                actions: [
-                                  GestureDetector(
-                                    child: Container(
-                                      child: Image(image: AssetImage('assets/mast0.png')),
-                                      width: 60,
-                                      height: 60,
-                                    ),
-                                    onTap: () => Navigator.pop(context, 'П')
-                                  ),
-                                  GestureDetector(
-                                    child: Container(
-                                      child: Image(image: AssetImage('assets/mast1.png')),
-                                      width: 60,
-                                      height: 60,
-                                    ),
-                                    onTap: () => Navigator.pop(context, 'Т')
-                                  ),
-                                  GestureDetector(
-                                    child: Container(
-                                      child: Image(image: AssetImage('assets/mast2.png')),
-                                      width: 60,
-                                      height: 60,
-                                    ),
-                                    onTap: () => Navigator.pop(context, 'Б')
-                                  ),
-                                  GestureDetector(
-                                    child: Container(
-                                      child: Image(image: AssetImage('assets/mast3.png')),
-                                      width: 60,
-                                      height: 60,
-                                    ),
-                                    onTap: () => Navigator.pop(context, 'Ч')
-                                  ),
-                                ],
-                              );
-                              showCupertinoDialog(
-                                context: context,
-                                builder: (_) => dialog
-                              ).then((value) {
-                                print(value);
-                                print('5sending: ${{'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : game.myMove, 'mast' : value}}');
-                                widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : json.encode(game.myMove), 'mast' : value}));
-                                setState(() {
-                                  game.mastLimit = value;
-                                  isMyMove = false;
-                                  game.myMove.clear();
-                                  isNoCardsToMove = false;
-                                });
-                                game.mastLimit = '';
-                              });
-                            } else {
-                              print('6sending: ${{'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : game.myMove, 'mast' : game.mastLimit}}');
-                              widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : json.encode(game.myMove), 'mast' : game.mastLimit}));
-                              setState(() {
-                                isMyMove = false;
-                                game.myMove.clear();
-                                game.mastLimit = '';
-                                isNoCardsToMove = false;
-                              });
-                            }
-                          }
-                        });
-                      },
-                      builder: (context, candidates, rejects) {
-                        if (candidates.isNotEmpty) return ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                          child: Container(
-                            width: 60,
-                            height: 90,
-                            color: Colors.green,
-                            child: null,//Image(image: AssetImage('assets/back.png')),
-                          )
-                        );
-                        if (rejects.isNotEmpty) return ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                          child: Container(
-                            width: 60,
-                            height: 90,
-                            color: Colors.red,
-                            child: null,//Image(image: AssetImage('assets/back.png')),
-                          )
-                        );
-                        return ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                          child: CardWidget(
-                            card: game.heapCards.isNotEmpty ? game.heapCards.last : '-',
-                            game: game,
-                            mode: 'target',
-                          )
-                        );
-                      }
-                    ),
-                    GestureDetector(
-                      onTap: isNoCardsToMove ? () {
-                        print('7sending: ${{'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}}');
-                        widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}));
-                        } : null,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                        child: Container(
-                          width: 60,
-                          height: 90,
-                          color: !isNoCardsToMove ? Colors.black54 : Colors.green,
-                        ),//Image(image: AssetImage('assets/back.png')),
-                      ),
-                    ),
-                  ]
-                ),
-              ),
-            ),
-            Flexible(
-              flex: 4,
-              //fit: FlexFit.tight,
-              child: Container(
-                child: Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: listPlayerCardsWidgets(),
-                )
-              ),
-            ),
-          ]
+        body: SafeArea(
+          child: Stack(
+            children: cardsWidgets(game)
+          )
         ),
       )
     );
   }
 
-  List<Widget> _listCoPlayers() {
-    List<Widget> _list = [];
-    game.cardsCoPlayers.forEach((name, leftCards) {
-      _list.add(
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(name + (moverName == name ? ' (Ходит...)' : '')),
-            Wrap(
-              spacing: 10,
-              children: _hiddenCards(leftCards)
-            )
-          ]
+  String whereIsCard(String mast, String dost, Uno game) {
+    print('whereisCard $dost-$mast');
+    //print('my: ${game.myCards}');
+    //print('heap: ${game.heapCards}');
+    //print('co: ${game.cardsCoPlayers}');
+    String _pos = 'base';
+    if (game.myCards.contains('$dost-$mast')) _pos = 'player';
+    if (game.heapCards.contains('$dost-$mast')) _pos = 'heap';
+    game.cardsCoPlayers.forEach((player, cards) {
+      if (cards.contains('$dost-$mast')) _pos = 'coPlayer_$player';
+    });
+    print(_pos);
+    return _pos;
+  }
+
+  List<double> getPosition(String mast, String dost, Uno game) {
+    print('getPos of $dost-$mast');
+    double baseCardPositionTop = deviceSize.height / 2 - 90, baseCardPositionLeft = deviceSize.width / 2 + 30;
+    //колода
+    List<double> _pos = [baseCardPositionTop, baseCardPositionLeft];
+    //карты игрока
+    int qInRow = game.myCards.length > 10 ? 6 : 5;
+    int otstup = game.myCards.length > 10 ? 60 : 70;
+    if (game.myCards.contains('$dost-$mast')) {
+      _pos = [baseCardPositionTop + 120 + ((game.myCards.indexOf('$dost-$mast')) / qInRow).floor() * 100, 10.0 + game.myCards.indexOf('$dost-$mast') % qInRow * otstup];
+    }
+    //куча
+    if (game.heapCards.contains('$dost-$mast')) _pos[1] -= 70;
+    //противники
+    game.cardsCoPlayers.forEach((player, cards) {
+      if (cards.contains('$dost-$mast')) {
+        _pos = [30 + game.cardsCoPlayers.keys.toList().indexOf(player) * 60.0, 10.0 + cards.indexOf('$dost-$mast') * 25];
+      }
+    });
+    print(_pos);
+    return _pos;
+  }
+  
+  List<Widget> cardsWidgets(Uno _game) {
+    List<Widget> _listOfCards = [];
+    game.baseCards = [];
+    _game.mastList.forEach((_mast) {
+      _game.dostList.forEach((_dost) {
+        String _statePosition = whereIsCard(_mast, _dost, _game);
+        switch (_statePosition) {
+          case 'base':
+            game.baseCards.add('$_dost-$_mast');
+            _listOfCards.add(
+              AnimatedPositioned(
+                key: Key('$_dost-$_mast'),
+                child: GestureDetector(
+                  onTap: isNoCardsToMove ? () {
+                    print('7sending: ${{'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}}');
+                    widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}));
+                    } : null,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    child: Container(
+                      width: 60,
+                      height: 90,
+                      color: !isNoCardsToMove ? Colors.black54 : Colors.green,
+                    ),//Image(image: AssetImage('assets/back.png')),
+                  ),
+                ),
+                duration: Duration(milliseconds: 1000),
+                curve: Curves.linearToEaseOut,
+                top: getPosition(_mast, _dost, _game)[0],
+                left: getPosition(_mast, _dost, _game)[1],
+              )
+            );
+            break;
+          case 'heap':
+            _listOfCards.add(
+              AnimatedPositioned(
+                key: Key('$_dost-$_mast'),
+                child: DragTarget<String>(
+                  onWillAccept: (card){
+                    switch (moveMode) {
+                      case 'addCardByDost':
+                        return (game.dostOf(card) == game.dostLimit);
+                        break;
+                      case 'addCardByMast':
+                        return (game.mastOf(card) == game.mastLimit || game.dostOf(card) == 'В');
+                      default:
+                        return (game.dostOf(card) == game.dostOf(game.heapCards.last) || game.mastOf(card) == game.mastOf(game.heapCards.last) || game.dostOf(card) == 'В');
+                    }
+                  },
+                  onAccept: (String card){
+                    setState(() {
+                      game.myMove.add(card);
+                      game.heapCards.add(card);
+                      print('8sending...');
+                      widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'addHeap', 'heap' : game.heapCards.last, 'name' : widget.player, 'gameName' : widget.gameName}));
+                      game.myCards.remove(card);
+                      moveMode = 'addCardByDost';
+                      game.dostLimit = game.dostOf(game.heapCards.last);
+                      game.mastLimit = '';
+                      if (!ChildBridge(game).checkForCardsToMove()) {
+                        print('Ending move by auto');
+                        game.mastLimit = '';
+                        game.dostLimit = '';
+                        if (game.dostOf(game.myMove.last) == 'В') {
+                          var dialog = CupertinoAlertDialog(
+                            title: Text('Выберите масть'),
+                            actions: [
+                              GestureDetector(
+                                child: Container(
+                                  child: Image(image: AssetImage('assets/mast0.png')),
+                                  width: 60,
+                                  height: 60,
+                                ),
+                                onTap: () => Navigator.pop(context, 'П')
+                              ),
+                              GestureDetector(
+                                child: Container(
+                                  child: Image(image: AssetImage('assets/mast1.png')),
+                                  width: 60,
+                                  height: 60,
+                                ),
+                                onTap: () => Navigator.pop(context, 'Т')
+                              ),
+                              GestureDetector(
+                                child: Container(
+                                  child: Image(image: AssetImage('assets/mast2.png')),
+                                  width: 60,
+                                  height: 60,
+                                ),
+                                onTap: () => Navigator.pop(context, 'Б')
+                              ),
+                              GestureDetector(
+                                child: Container(
+                                  child: Image(image: AssetImage('assets/mast3.png')),
+                                  width: 60,
+                                  height: 60,
+                                ),
+                                onTap: () => Navigator.pop(context, 'Ч')
+                              ),
+                            ],
+                          );
+                          showCupertinoDialog(
+                            context: context,
+                            builder: (_) => dialog
+                          ).then((value) {
+                            print(value);
+                            print('5sending: ${{'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : game.myMove, 'mast' : value}}');
+                            widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : json.encode(game.myMove), 'mast' : value}));
+                            setState(() {
+                              game.mastLimit = value;
+                              isMyMove = false;
+                              game.myMove.clear();
+                              isNoCardsToMove = false;
+                            });
+                            game.mastLimit = '';
+                          });
+                        } else {
+                          print('6sending: ${{'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : game.myMove, 'mast' : game.mastLimit}}');
+                          widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : json.encode(game.myMove), 'mast' : game.mastLimit}));
+                          setState(() {
+                            isMyMove = false;
+                            game.myMove.clear();
+                            game.mastLimit = '';
+                            isNoCardsToMove = false;
+                          });
+                        }
+                      }
+                    });
+                  },
+                  builder: (context, candidates, rejects) {
+                    if (candidates.isNotEmpty) return ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      child: Container(
+                        width: 60,
+                        height: 90,
+                        color: Colors.green,
+                        child: null,//Image(image: AssetImage('assets/back.png')),
+                      )
+                    );
+                    if (rejects.isNotEmpty) return ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      child: Container(
+                        width: 60,
+                        height: 90,
+                        color: Colors.red,
+                        child: null,//Image(image: AssetImage('assets/back.png')),
+                      )
+                    );
+                    return ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      child: CardWidget(
+                        card: game.heapCards.isNotEmpty ? game.heapCards.last : '-',
+                        game: game,
+                        mode: 'target',
+                      )
+                    );
+                  }
+                ),
+                duration: Duration(milliseconds: 1000),
+                curve: Curves.linearToEaseOut,
+                top: getPosition(_mast, _dost, _game)[0],
+                left: getPosition(_mast, _dost, _game)[1],
+              )
+            );
+            break;
+          case 'player':
+            _listOfCards.add(
+              AnimatedPositioned(
+                key: Key('$_dost-$_mast'),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  child: isMyMove ?
+                    Draggable<String>(
+                      data: '$_dost-$_mast',
+                      child: CardWidget(card: '$_dost-$_mast', game: game),
+                      feedback: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        child: CardWidget(card: '$_dost-$_mast', game: game, mode: 'drag')
+                      ),
+                      childWhenDragging: null,
+                    ) :
+                    CardWidget(card: '$_dost-$_mast', game: game)
+                ),
+                duration: Duration(milliseconds: 500),
+                top: getPosition(_mast, _dost, _game)[0],
+                left: getPosition(_mast, _dost, _game)[1],
+              )
+            );
+            break;
+          default:
+            _listOfCards.add(
+              AnimatedPositioned(
+                key: Key('$_dost-$_mast'),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  child: Container(
+                    width: 20,
+                    height: 30,
+                    color: Colors.black54,
+                    child: null,//Image(image: AssetImage('assets/back.png')),
+                  ),
+                ),
+                duration: Duration(milliseconds: 1000),
+                curve: Curves.linearToEaseOut,
+                top: getPosition(_mast, _dost, _game)[0],
+                left: getPosition(_mast, _dost, _game)[1],
+              )
+            );
+        }
+      });
+    });
+    //имена игроков
+    game.cardsCoPlayers.forEach((player, cards) {
+      _listOfCards.add(
+        Positioned(
+          top: getPosition(game.mastOf(cards.first), game.dostOf(cards.first), game)[0] - 20,
+          left: 10.0,
+          child: Text(player + (moverName == player ? ' (Ходит...)' : ''))
         )
       );
     });
-    return _list;
-  }
-
-  List<Widget> _hiddenCards(int count) {
-    List<Widget> _list = [];
-    for (var i = 0; i < count; i++) {
-      _list.add(
-        ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-          child: Container(
-            width: 20,
-            height: 30,
-            color: Colors.black54,
-            child: null,//Image(image: AssetImage('assets/back.png')),
-          ),
+    //масть
+    if (game.mastLimit.isNotEmpty) _listOfCards.add(
+      Positioned(
+        top: getPosition(game.mastOf(game.heapCards.first), game.dostOf(game.heapCards.first), game)[0] + 15,
+        left: getPosition(game.mastOf(game.heapCards.first), game.dostOf(game.heapCards.first), game)[1] - 70,
+        child: Container(
+          width: 60,
+          height: 60,
+          child: Image(image: AssetImage('assets/mast${game.mastList.indexOf(game.mastLimit)}.png'),),
         )
-      );
-    }
-    return _list;
-  }
-
-  List<Widget> listPlayerCardsWidgets() {
-    List<String> _cards = game.myCards..sort();
-    List<Widget> _list = [];
-    _cards.forEach(
-      (card) {
-        //cardColors[card] = Colors.lightBlue[100];
-        _list.add(
-          ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            child: isMyMove ?
-              Draggable<String>(
-                data: card,
-                child: CardWidget(card: card, game: game),
-                feedback: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  child: CardWidget(card: card, game: game, mode: 'drag')
-                ),
-                childWhenDragging: null,
-              ) :
-              CardWidget(card: card, game: game)
-          )
-        );
-      }
+      )
     );
-    return _list;
-  }
 
-  Widget getDost(String card) {
-    return Text(card.split('-')[0]);
-  }
-  Widget getMast(String card) {
-    return Text(card.split('-')[1]);
+    return _listOfCards;
   }
 }

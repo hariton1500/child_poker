@@ -4,8 +4,9 @@ class Uno {
   List<String> mastList = ['П', 'Т', 'Б', 'Ч'];
   List<String> dostList = ['6', '7', '8', '9', '10', 'В', 'Д', 'К', 'Т'];
   int currentMovePlayer = 1, basePlayer = 0, baseCardsLeft;
-  Map<String, int> cardsCoPlayers, scores;
-  List<String> myCards, heapCards, myMove;
+  Map<String, List<String>> cardsCoPlayers = {};
+  Map<String, int> scores;
+  List<String> myCards, heapCards, myMove, baseCards;
   String dostLimit = '', mastLimit = '';
   final List<String> rules = [
     'Правила игры:',
@@ -51,11 +52,13 @@ class Uno {
 }
 
 class CardWidget extends StatelessWidget {
-  const CardWidget({Key key, this.card, this.game, this.mode}) : super(key : key);
+  const CardWidget({Key key, this.statePosition, this.card, this.game, this.mode, this.isNoCardsToMove}) : super(key : key);
 
   final String card;
   final Uno game;
   final String mode;
+  final String statePosition;
+  final bool isNoCardsToMove;
 
   @override
   Widget build(BuildContext context) {
@@ -117,5 +120,24 @@ class CardWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class CardBack extends StatelessWidget {
+  final bool isSmall;
+  final Color color;
+
+  const CardBack({Key key, this.isSmall, this.color}) : super(key : key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.all(Radius.circular(5.0))
+      ),
+      height: !isSmall ? 90 : 30,
+      width: !isSmall ? 60 : 20,
+    );  
   }
 }
