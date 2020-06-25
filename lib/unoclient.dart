@@ -49,6 +49,32 @@ class Uno {
     return card.split('-')[1];
   }
 
+  getScores() {
+    cardsCoPlayers.forEach((_player, _cards) {
+      int _score = 0;
+      _cards.forEach((_card) {
+        if (dostOf(_card) == 'В') _score += 20;
+        if (dostOf(_card) == 'Т') _score += 15;
+        if (dostOf(_card) == '10') _score += 10;
+        if (dostOf(_card) == 'Д') _score += 10;
+        if (dostOf(_card) == 'К') _score += 10;
+      });
+      scores[_player] = _score;
+    });
+  }
+
+  int getMyScore() {
+    int _score = 0;
+    myCards.forEach((_card) {
+      if (dostOf(_card) == 'В') _score += 20;
+      if (dostOf(_card) == 'Т') _score += 15;
+      if (dostOf(_card) == '10') _score += 10;
+      if (dostOf(_card) == 'Д') _score += 10;
+      if (dostOf(_card) == 'К') _score += 10;
+    });
+    return _score;
+  }
+
 }
 
 class CardWidget extends StatelessWidget {

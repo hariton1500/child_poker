@@ -31,7 +31,7 @@ class _GamePageState extends State<GamePage> {
   final state = GlobalKey<ScaffoldState>();
   Uno game = Uno();
   Map<String, Color> cardColors = {};
-  List<String> selectedCards = [];
+  //List<String> selectedCards = [];
   double cardWidth = 60;
   String dragData = '', moverName = '', moveMode = '';
   bool isMyMove = false, isNoCardsToMove = false, isEndOfGame = false;
@@ -103,41 +103,53 @@ class _GamePageState extends State<GamePage> {
                   isMyMove = true;
                   moveMode = 'addCardByMast';
                   moverName = widget.player;
-                  if (ChildBridge(game).checkForCardsToMove()) isNoCardsToMove = !true; else isNoCardsToMove = !false;
+                  if (ChildBridge(game).checkForCardsToMove()) isNoCardsToMove = false; else {
+                    isNoCardsToMove = true;
+                    print('7.1sending: ${{'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}}');
+                    widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}));
+                  }
                 });
                 break;
               case 'moverIs':
-                setState(() {
-                  if (msg['movePlayer'].toString() == widget.player) {
-                    isMyMove = true;
-                    moveMode = 'newCard';
-                    print('My move now. Now it is: ${game.myMove}');
-                    if (game.myMove.length == 0) {
-                      print('myMove is empty. Clean dost limits.');
-                      game.dostLimit = '';
-                    }
-                    //проверка на наличие карт для хода
-                    if (ChildBridge(game).checkForCardsToMove()) {
-                      print('I have cards to move');
-                      isNoCardsToMove = false;
+                //if (!checkForWinner()) {
+                  setState(() {
+                    if (msg['movePlayer'].toString() == widget.player) {
+                      isMyMove = true;
+                      moveMode = 'newCard';
+                      print('My move now. Now it is: ${game.myMove}');
+                      if (game.myMove.length == 0) {
+                        print('myMove is empty. Clean dost limits.');
+                        game.dostLimit = '';
+                      }
+                      //проверка на наличие карт для хода
+                      if (ChildBridge(game).checkForCardsToMove()) {
+                        print('I have cards to move');
+                        isNoCardsToMove = false;
+                      } else {
+                        print('I need take cards from base');
+                        setState(() {
+                          isNoCardsToMove = true;
+                        });
+                        print('7.1sending: ${{'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}}');
+                        widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}));
+                      }
                     } else {
-                      print('I need take cards from base');
-                      setState(() {
-                        isNoCardsToMove = true;
-                      });
+                      isMyMove = false;
                     }
-                  } else {
-                    isMyMove = false;
-                  }
-                  moverName = msg['movePlayer'];
-                  print('isMyMove: $isMyMove');
-                  print('move Player is: $moverName');
-                });
+                    moverName = msg['movePlayer'];
+                    print('isMyMove: $isMyMove');
+                    print('move Player is: $moverName');
+                  });
+                //}
                 break;
               case 'addCards':
                 json.decode(msg['cards']).forEach((card) {
                   game.myCards.add(card.toString());
                 });
+                if (!ChildBridge(game).checkForCardsToMove()) {
+                  //print('7.1sending: ${{'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}}');
+                  //widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}));
+                }
                 setState(() {isNoCardsToMove = !ChildBridge(game).checkForCardsToMove();});
                 break;
               //{'type' : 'inGame', 'typeMove': 'addCardsToCoPlayer', 'name' : _to, 'cardsNumber' : _cardsNumber.toString()}
@@ -163,10 +175,10 @@ class _GamePageState extends State<GamePage> {
                   //game.heapCards.add(msg['card']);
                   //game.cardsCoPlayers[msg['name']] -= 1;
                   game.cardsCoPlayers[msg['name']].remove(_card);
-                  setState(() {});
+                  if (!checkForWinner()) setState(() {});
                 }
                 break;
-              case 'winner':
+              case 'winner_':
                 //{'type' : 'inGame', 'typeMove' : 'winner', 'winnerName' : _winner, 'scoreMap' : json.encode(scoreMap[_game.name])}
                 game.heapCards = [];
                 game.myCards = [];
@@ -214,8 +226,13 @@ class _GamePageState extends State<GamePage> {
       onWillPop: _canExit,
       child: Scaffold(
         key: state,
-        bottomSheet: FlatButton(
+        floatingActionButton: RaisedButton(
+          elevation: 3.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.0)
+          ),
           textColor: Colors.green,
+          color: Colors.blue[50],
           onPressed: isMyMove && game.myMove.isNotEmpty ? () {
             print('My move is: ${game.myMove}');
             print('End of My move. Clean limits before Valet check');
@@ -273,6 +290,7 @@ class _GamePageState extends State<GamePage> {
                   isNoCardsToMove = false;
                 });
                 game.mastLimit = '';
+                checkForWinner();
               });
             } else {
               print('4sending: ${{'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : game.myMove, 'mast' : game.mastLimit}}');
@@ -283,6 +301,7 @@ class _GamePageState extends State<GamePage> {
                 game.mastLimit = '';
                 isNoCardsToMove = false;
               });
+              checkForWinner();
             }
           } : null,
           child: Text('Завершить ход')
@@ -304,7 +323,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   String whereIsCard(String mast, String dost, Uno game) {
-    print('whereisCard $dost-$mast');
+    //print('whereisCard $dost-$mast');
     //print('my: ${game.myCards}');
     //print('heap: ${game.heapCards}');
     //print('co: ${game.cardsCoPlayers}');
@@ -314,12 +333,12 @@ class _GamePageState extends State<GamePage> {
     game.cardsCoPlayers.forEach((player, cards) {
       if (cards.contains('$dost-$mast')) _pos = 'coPlayer_$player';
     });
-    print(_pos);
+    //print(_pos);
     return _pos;
   }
 
   List<double> getPosition(String mast, String dost, Uno game) {
-    print('getPos of $dost-$mast');
+    //print('getPos of $dost-$mast');
     double baseCardPositionTop = deviceSize.height / 2 - 90, baseCardPositionLeft = deviceSize.width / 2 + 30;
     //колода
     List<double> _pos = [baseCardPositionTop, baseCardPositionLeft];
@@ -337,7 +356,7 @@ class _GamePageState extends State<GamePage> {
         _pos = [30 + game.cardsCoPlayers.keys.toList().indexOf(player) * 60.0, 10.0 + cards.indexOf('$dost-$mast') * 25];
       }
     });
-    print(_pos);
+    //print(_pos);
     return _pos;
   }
   
@@ -352,7 +371,7 @@ class _GamePageState extends State<GamePage> {
             game.baseCards.add('$_dost-$_mast');
             _listOfCards.add(
               AnimatedPositioned(
-                key: Key('$_dost-$_mast'),
+                //key: Key('$_dost-$_mast'),
                 child: GestureDetector(
                   onTap: isNoCardsToMove ? () {
                     print('7sending: ${{'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}}');
@@ -377,7 +396,7 @@ class _GamePageState extends State<GamePage> {
           case 'heap':
             _listOfCards.add(
               AnimatedPositioned(
-                key: Key('$_dost-$_mast'),
+                //key: Key('$_dost-$_mast'),
                 child: DragTarget<String>(
                   onWillAccept: (card){
                     switch (moveMode) {
@@ -397,6 +416,7 @@ class _GamePageState extends State<GamePage> {
                       print('8sending...');
                       widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'addHeap', 'heap' : game.heapCards.last, 'name' : widget.player, 'gameName' : widget.gameName}));
                       game.myCards.remove(card);
+                      checkForWinner();
                       moveMode = 'addCardByDost';
                       game.dostLimit = game.dostOf(game.heapCards.last);
                       game.mastLimit = '';
@@ -456,6 +476,7 @@ class _GamePageState extends State<GamePage> {
                               isNoCardsToMove = false;
                             });
                             game.mastLimit = '';
+                            checkForWinner();
                           });
                         } else {
                           print('6sending: ${{'type' : 'inGame', 'gameType' : 'playerMove', 'gameName' : widget.gameName, 'move' : game.myMove, 'mast' : game.mastLimit}}');
@@ -466,6 +487,7 @@ class _GamePageState extends State<GamePage> {
                             game.mastLimit = '';
                             isNoCardsToMove = false;
                           });
+                          //checkForWinner();
                         }
                       }
                     });
@@ -509,7 +531,7 @@ class _GamePageState extends State<GamePage> {
           case 'player':
             _listOfCards.add(
               AnimatedPositioned(
-                key: Key('$_dost-$_mast'),
+                //key: Key('$_dost-$_mast'),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: isMyMove ?
@@ -533,7 +555,7 @@ class _GamePageState extends State<GamePage> {
           default:
             _listOfCards.add(
               AnimatedPositioned(
-                key: Key('$_dost-$_mast'),
+                //key: Key('$_dost-$_mast'),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Container(
@@ -576,5 +598,25 @@ class _GamePageState extends State<GamePage> {
     );
 
     return _listOfCards;
+  }
+
+  bool checkForWinner() {
+    print('checkForWinner:');
+    print(game.myCards);
+    print(game.cardsCoPlayers);
+    if (game.myCards.length == 0) {
+      scoreOfGame = 0;
+      game.getScores();
+      Timer(Duration(milliseconds: 1000), () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){return EndOfGamePage(player: widget.player, subscription: widget.subscription, socket: widget.socket, winner: widget.player, gameName: widget.gameName, score: scoreOfGame, scoreMap: game.scores);})));
+      return true;
+    }
+    game.cardsCoPlayers.forEach((_player, _cards) {
+      if (_cards.length == 0) {
+        scoreOfGame = game.getMyScore();
+        Timer(Duration(milliseconds: 1000), () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){return EndOfGamePage(player: widget.player, subscription: widget.subscription, socket: widget.socket, winner: _player, gameName: widget.gameName, score: scoreOfGame, scoreMap: scoreMap);})));
+        return true;
+      }
+    });
+    return false;
   }
 }
