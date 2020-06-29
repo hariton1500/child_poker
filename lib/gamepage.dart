@@ -175,7 +175,8 @@ class _GamePageState extends State<GamePage> {
                   //game.heapCards.add(msg['card']);
                   //game.cardsCoPlayers[msg['name']] -= 1;
                   game.cardsCoPlayers[msg['name']].remove(_card);
-                  if (!checkForWinner()) setState(() {});
+                  if (!checkForWinner() && game.cardsCoPlayers[moverName].length > 0) setState(() {});
+                  print(game.heapCards);
                 }
                 break;
               case 'winner_':
@@ -333,7 +334,9 @@ class _GamePageState extends State<GamePage> {
     game.cardsCoPlayers.forEach((player, cards) {
       if (cards.contains('$dost-$mast')) _pos = 'coPlayer_$player';
     });
-    //print(_pos);
+    game.cardsCoPlayers.forEach((key, value) {
+      if (value.length == 0) print('$dost-$mast: $_pos');      
+    });
     return _pos;
   }
 
@@ -371,7 +374,7 @@ class _GamePageState extends State<GamePage> {
             game.baseCards.add('$_dost-$_mast');
             _listOfCards.add(
               AnimatedPositioned(
-                //key: Key('$_dost-$_mast'),
+                key: Key('$_dost-$_mast'),
                 child: GestureDetector(
                   onTap: isNoCardsToMove ? () {
                     print('7sending: ${{'type' : 'inGame', 'gameType' : 'takeCardFromBase', 'name' : widget.player, 'gameName' : widget.gameName}}');
@@ -396,7 +399,7 @@ class _GamePageState extends State<GamePage> {
           case 'heap':
             _listOfCards.add(
               AnimatedPositioned(
-                //key: Key('$_dost-$_mast'),
+                key: Key('$_dost-$_mast'),
                 child: DragTarget<String>(
                   onWillAccept: (card){
                     switch (moveMode) {
@@ -531,7 +534,7 @@ class _GamePageState extends State<GamePage> {
           case 'player':
             _listOfCards.add(
               AnimatedPositioned(
-                //key: Key('$_dost-$_mast'),
+                key: Key('$_dost-$_mast'),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: isMyMove ?
@@ -555,7 +558,7 @@ class _GamePageState extends State<GamePage> {
           default:
             _listOfCards.add(
               AnimatedPositioned(
-                //key: Key('$_dost-$_mast'),
+                key: Key('$_dost-$_mast'),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Container(
