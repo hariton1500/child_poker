@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+//import 'dart:math';
 
 import 'package:childbridge/startpage.dart';
 import 'package:childbridge/unoclient.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -21,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   static final TextEditingController _name = new TextEditingController();
   String playerName = '';
   Socket socket;
+  // ignore: cancel_subscriptions
   StreamSubscription subscription;
   final state = GlobalKey<ScaffoldState>();
   //final List<String> rules = Uno().rules;
@@ -60,76 +63,82 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: (){state.currentState.openDrawer();},
         ),
         title: Text('Детский бридж'),
+        backgroundColor: Colors.green,
         centerTitle: true,
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            _buildJoin(),
-          ],
-        ),
+      body: Container(
+        color: Colors.green,
+        child: _buildJoin(),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
       ),
     );
   }
 
   Widget _buildJoin() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: <Widget>[
-          TextField(
-            controller: _name,
-            keyboardType: TextInputType.text,
-            decoration: InputDecoration(
-              hintText: 'Ваше имя?',
-              contentPadding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-              icon: const Icon(Icons.person),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        TextField(
+          controller: _name,
+          keyboardType: TextInputType.text,
+          autocorrect: false,
+          decoration: InputDecoration(
+            fillColor: Colors.white,
+            hintText: 'Ваше имя?',
+            contentPadding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(25.0),
             ),
+            icon: const Icon(Icons.person, color: Colors.white,),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                RaisedButton(
-                  onPressed: _onGameConnect,//_onGameJoin,
-                  child: Text(widget._playerName.isEmpty ? 'Войти...' : 'Поменять имя...'),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              RaisedButton(
+                color: Colors.lightGreen,
+                textColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)
                 ),
-                widget._playerName.isNotEmpty ?
-                  RaisedButton(
-                    onPressed: _stayOldName,
-                    child: Text('Оставить ${widget._playerName}'),
-                  ):
-                  Container()
-              ]
-            )
-          ),
-        ],
-      ),
+                onPressed: _onGameConnect,//_onGameJoin,
+                child: Text(widget._playerName.isEmpty ? 'Войти...' : 'Поменять имя...'),
+              ),
+            ]
+          )
+        ),
+      ],
     );
-  }
-
-  _stayOldName() {
-    playerName = widget._playerName;
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context){return StartPage(_name.text, subscription, socket);}));
   }
 
   _onGameConnect() async{
     if (_name.text.isNotEmpty) {
       playerName = _name.text.trim();
-      Future<Socket> channel = Socket.connect(widget.serverAddress, 4040);
+      Future<Socket> channel = Socket.connect(widget.serverAddress, 4040, timeout: Duration(seconds: 3));
       channel.then((Socket stream) {
         print('Connected to: ${stream.remoteAddress.address}');
         socket = stream;
-        subscription = stream.listen((event) {handleMsg(event, socket);});
+        subscription = stream.listen((event) {handleMsg(event, socket);}, onError: (e) => print(e));
         stream.write(json.encode({'type' : 'addPlayer', 'name' : playerName, 'from' : Platform.localHostname}));
-      });
+      }, onError: (e) => showToast());
     }
   }
+
+  void showToast() {
+    Fluttertoast.showToast(
+      msg: 'Ошибка подключения к серверу. Попробуйте позже :(',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.black54,
+      textColor: Colors.white,
+      fontSize: 14.0
+    );    
+  }
+
   void handleMsg(data, Socket socket) {
     //print('recieved raw: $data');
     String _msg = utf8.decode(data);

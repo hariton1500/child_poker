@@ -33,7 +33,7 @@ class _GamePageState extends State<GamePage> {
   Map<String, Color> cardColors = {};
   //List<String> selectedCards = [];
   double cardWidth = 60;
-  String dragData = '', moverName = '', moveMode = '';
+  String dragData = '', moverName = '', moveMode = '', comment = '';
   bool isMyMove = false, isNoCardsToMove = false, isEndOfGame = false;
   int scoreOfGame = 0;
   Map<String, int> scoreMap = {};
@@ -88,13 +88,16 @@ class _GamePageState extends State<GamePage> {
                 widget.socket.write(json.encode({'type' : 'inGame', 'gameType' : 'whatNextFirst?', 'name' : widget.player, 'gameName' : widget.gameName}));
                 break;
               case 'youCanAddCards':
+                print('commmmment!!!!!!!!!!!!!!!!!!!!!!');
                 game.dostLimit = msg['dost'];
                 setState(() {
+                  comment = 'Можно добавить карты с достоинством: ${game.dostLimit}';
                   game.myMove = [game.heapCards.last];
                   isMyMove = true;
                   moveMode = 'addCardByDost';
                   moverName = widget.player;
                 });
+                comment = '';
                 break;
               case 'setMast':
                 game.mastLimit = msg['mast'];
@@ -175,7 +178,9 @@ class _GamePageState extends State<GamePage> {
                   //game.heapCards.add(msg['card']);
                   //game.cardsCoPlayers[msg['name']] -= 1;
                   game.cardsCoPlayers[msg['name']].remove(_card);
-                  if (!checkForWinner() && game.cardsCoPlayers[moverName].length > 0) setState(() {});
+                  //if (!checkForWinner() && game.cardsCoPlayers[moverName].length > 0) setState(() {});
+                  setState(() {});
+                  Timer(Duration(seconds:1), () => checkForWinner());
                   print(game.heapCards);
                 }
                 break;
@@ -232,8 +237,8 @@ class _GamePageState extends State<GamePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0)
           ),
-          textColor: Colors.green,
-          color: Colors.blue[50],
+          textColor: Colors.white,
+          color: Colors.green,
           onPressed: isMyMove && game.myMove.isNotEmpty ? () {
             print('My move is: ${game.myMove}');
             print('End of My move. Clean limits before Valet check');
@@ -309,14 +314,35 @@ class _GamePageState extends State<GamePage> {
         ),
         backgroundColor: Colors.lightBlue[300],
         appBar: AppBar(
-          title: Text(widget.player),
-          elevation: 5,
+          title: Text('Ваше имя: ${widget.player}'),
+          elevation: 0,
+          automaticallyImplyLeading: true,
+          leading: IconButton(
+            icon: Icon(Icons.help),
+            onPressed: (){state.currentState.openDrawer();},
+          ),
           centerTitle: true,
           backgroundColor: isMyMove ? Colors.green : Colors.red,
         ),
+        drawer: Drawer(
+          child: SafeArea(
+            child: Center(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: Uno().rules.length,
+                itemBuilder: (context, index) {
+                  return Text(Uno().rules[index]);
+                },
+              )
+            )
+          )
+        ),
         body: SafeArea(
-          child: Stack(
-            children: cardsWidgets(game)
+          child: Container(
+            color: Colors.black,
+            child: Stack(
+              children: cardsWidgets(game)
+            )
           )
         ),
       )
@@ -385,7 +411,7 @@ class _GamePageState extends State<GamePage> {
                     child: Container(
                       width: 60,
                       height: 90,
-                      color: !isNoCardsToMove ? Colors.black54 : Colors.green,
+                      color: isMyMove ? Colors.green : Colors.red,
                     ),//Image(image: AssetImage('assets/back.png')),
                   ),
                 ),
@@ -564,7 +590,7 @@ class _GamePageState extends State<GamePage> {
                   child: Container(
                     width: 20,
                     height: 30,
-                    color: Colors.black54,
+                    color: moverName != game.cardsCoPlayers.keys.firstWhere((player) => game.cardsCoPlayers[player].contains('$_dost-$_mast'))  ? Colors.red : Colors.green,
                     child: null,//Image(image: AssetImage('assets/back.png')),
                   ),
                 ),
@@ -579,13 +605,15 @@ class _GamePageState extends State<GamePage> {
     });
     //имена игроков
     game.cardsCoPlayers.forEach((player, cards) {
-      _listOfCards.add(
-        Positioned(
-          top: getPosition(game.mastOf(cards.first), game.dostOf(cards.first), game)[0] - 20,
-          left: 10.0,
-          child: Text(player + (moverName == player ? ' (Ходит...)' : ''))
-        )
-      );
+      if (cards.isNotEmpty) {
+        _listOfCards.add(
+          Positioned(
+            top: getPosition(game.mastOf(cards.first), game.dostOf(cards.first), game)[0] - 20,
+            left: 10.0,
+            child: Text(player + (moverName == player ? ' (Ходит...)' : ''), style: TextStyle(color: Colors.white, fontSize: 16),)
+          )
+        );
+      }
     });
     //масть
     if (game.mastLimit.isNotEmpty) _listOfCards.add(
@@ -599,7 +627,15 @@ class _GamePageState extends State<GamePage> {
         )
       )
     );
-
+    //подсказка
+    double baseCardPositionTop = deviceSize.height / 2 - 90;
+    if (comment != '') _listOfCards.add(
+      Positioned(
+        top: baseCardPositionTop + 95,
+        left: 10.0,
+        child: Text(comment, style: TextStyle(color: Colors.white, fontSize: 15, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),)
+      )
+    );
     return _listOfCards;
   }
 

@@ -34,15 +34,20 @@ class _EndOfGamePageState extends State<EndOfGamePage> {
         title: Text(widget.player),
         centerTitle: true,
       ),
-      body: Center(
+      body: Container(
+        padding: EdgeInsets.symmetric(vertical: 50),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text(widget.player == widget.winner ? 'ПОБЕДА!!!' : 'ПРОИГРЫШ!'),
+            Text(widget.player == widget.winner ? 'ПОБЕДА!!!' : 'ПРОИГРЫШ!', style: TextStyle(fontSize: 30),),
             widget.player == widget.winner ? _scoreTable() : Container(),
             Text(widget.player == widget.winner ? '' : 'Получено ${widget.score} штрафных очков'),
             RaisedButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0)
+              ),
+              color: Colors.green,
               child: Text('Продолжить...'),
               onPressed: () {Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => RoomPage(player: widget.player, subscription: widget.subscription, socket: widget.socket, role: widget.player == widget.gameName ? 'owner' : 'visitor', gameName: widget.gameName, isContinue: true)));}
             )

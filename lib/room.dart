@@ -5,6 +5,8 @@ import 'package:childbridge/gamepage.dart';
 import 'package:childbridge/startpage.dart';
 import 'package:flutter/material.dart';
 
+import 'unoclient.dart';
+
 class RoomPage extends StatefulWidget {
   @override
   _RoomPageState createState() => _RoomPageState();
@@ -116,36 +118,76 @@ class _RoomPageState extends State<RoomPage> {
     return Scaffold(
       key: state,
       appBar: AppBar(
-        title: Text(widget.player),
-        elevation: 5,
+        elevation: 0,
+        automaticallyImplyLeading: true,
+        leading: IconButton(
+          icon: Icon(Icons.help),
+          onPressed: (){state.currentState.openDrawer();},
+        ),
+        backgroundColor: Colors.black,
+        title: Text('Список игроков в комнате:'),
+        //elevation: 5,
         centerTitle: true,
       ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: Center(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: Uno().rules.length,
+              itemBuilder: (context, index) {
+                return Text(Uno().rules[index]);
+              },
+            )
+          )
+        )
+      ),
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Text('Ждем партнеров по игре:'),
-            _buildList(),
-          ]
+        child: Container(
+          padding: EdgeInsets.only(top: 20, left: 20),
+          color: Colors.black,
+          child: Column(
+            children: <Widget>[
+              //Text('Ждем партнеров по игре:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+              _buildList(),
+            ]
+          )
         )
       ),
       bottomNavigationBar: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            RaisedButton(
-              onPressed: (coPlayers.length > 1 && widget.role == 'owner' && !runStarted) ? _onStartGamePressed : null,
-              child: Text('Запуск игры'),
-            ),
-            RaisedButton(
-              onPressed: (widget.role == 'owner' && coPlayers.length <= 3) ? _sendAddBot : null,
-              child: Text('Добавить бота'),
-            ),
-            RaisedButton(
-              onPressed: leaveRoom,
-              child: Text('Назад'),
-            )
-          ],
-        ),
+        child: Container(
+          color: Colors.black,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)
+                ),
+                color: Colors.green,
+                onPressed: (coPlayers.length > 1 && widget.role == 'owner' && !runStarted) ? _onStartGamePressed : null,
+                child: Text('Запуск игры'),
+              ),
+              RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)
+                ),
+                color: Colors.blue,
+                onPressed: (widget.role == 'owner' && coPlayers.length <= 3) ? _sendAddBot : null,
+                child: Text('Добавить бота'),
+              ),
+              RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)
+                ),
+                color: Colors.yellow,
+                textColor: Colors.black,
+                onPressed: leaveRoom,
+                child: Text('Назад'),
+              )
+            ],
+          ),
+        )
       )
     );
   }
@@ -156,10 +198,11 @@ class _RoomPageState extends State<RoomPage> {
       itemCount: coPlayers.length,
       itemBuilder: (context, _index) {
         return ListTile(
-          dense: true,
+          dense: false,
+          contentPadding: EdgeInsets.only(bottom: 20),
           //leading: Text(_index.toString()),
-          title: Text(coPlayers[_index]),
-          subtitle: Text('Штрафных очков: ${scoreMap[coPlayers[_index]]}'),
+          title: Text(coPlayers[_index], style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 30)),
+          subtitle: Text('Штрафных очков: ${scoreMap[coPlayers[_index]]}', style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 20, fontStyle: FontStyle.italic)),
         );
       }
     );

@@ -18,6 +18,8 @@ class StartPage extends StatefulWidget {
 
 class _StartPageState extends State<StartPage> {
 
+  final state = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     print('game:init');
@@ -29,9 +31,16 @@ class _StartPageState extends State<StartPage> {
   Widget build(BuildContext context) {
     print('start:build');
     return Scaffold(
+      key: state,
       appBar: AppBar(
-        title: Text(widget.playerName),
+        title: Text('Ваше имя: ${widget.playerName}'),
         centerTitle: true,
+        elevation: 0,
+        automaticallyImplyLeading: true,
+        leading: IconButton(
+          icon: Icon(Icons.help),
+          onPressed: (){state.currentState.openDrawer();},
+        ),
       ),
       drawer: Drawer(
         child: SafeArea(
@@ -46,16 +55,28 @@ class _StartPageState extends State<StartPage> {
           )
         )
       ),
-      body: Center(
+      body: Container(
+        alignment: Alignment.center,
+        color: Colors.blue,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             RaisedButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0)
+              ),
+              color: Colors.green,
+              textColor: Colors.white,
               onPressed: _onFindGame,
               child: Text('Найти игру')
             ),
             RaisedButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0)
+              ),
+              color: Colors.red,
+              textColor: Colors.white,
               onPressed: _onCreateGame,
               child: Text('Создать игру')
             ),
@@ -63,14 +84,22 @@ class _StartPageState extends State<StartPage> {
         )
       ),
       bottomNavigationBar: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RaisedButton(
-              child: Text('Назад'),
-              onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => LoginPage(widget.playerName, widget.subscription, widget.socket)))
-            )
-          ]
+        child: Container(
+          color: Colors.blue,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)
+                ),
+                color: Colors.black,
+                textColor: Colors.white,
+                child: Text('Назад'),
+                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => LoginPage(widget.playerName, widget.subscription, widget.socket)))
+              )
+            ]
+          )
         )
       ),
     );
