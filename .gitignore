@@ -1,62 +1,46 @@
-.gradle
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
 /build/
 
-# Ignore Gradle GUI config
-gradle-app.setting
+# Web related
+lib/generated_plugin_registrant.dart
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
+# Symbolication related
+app.*.symbols
 
-# Cache of project
-.gradletasknamecache
+# Obfuscation related
+app.*.map.json
 
-# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
-# gradle/wrapper/gradle-wrapper.properties
-.dart_tool/package_config.json
-.dart_tool/flutter_build/05c8ef885f1b0f48aa1c8fae8aa712ec/.filecache
-.dart_tool/flutter_build/05c8ef885f1b0f48aa1c8fae8aa712ec/app.dill
-.dart_tool/flutter_build/05c8ef885f1b0f48aa1c8fae8aa712ec/debug_android_application.stamp
-.dart_tool/flutter_build/05c8ef885f1b0f48aa1c8fae8aa712ec/flutter_assets.d
-.dart_tool/flutter_build/05c8ef885f1b0f48aa1c8fae8aa712ec/kernel_snapshot.d
-.dart_tool/flutter_build/05c8ef885f1b0f48aa1c8fae8aa712ec/kernel_snapshot.stamp
-.dart_tool/flutter_build/05c8ef885f1b0f48aa1c8fae8aa712ec/outputs.json
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/.filecache
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/app.dill
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/debug_ios_bundle_flutter_assets.stamp
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/debug_universal_framework.stamp
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/flutter_assets.d
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/iphone_framework
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/kernel_snapshot.d
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/kernel_snapshot.stamp
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/outputs.json
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/simulator_framework
-.dart_tool/flutter_build/73ee19f4454eb29ec5ebf45757327830/App.framework/App
-.dart_tool/flutter_build/7aff818252151f3e8f767ffc59f6ba41/.filecache
-.dart_tool/flutter_build/7aff818252151f3e8f767ffc59f6ba41/app.dill
-.dart_tool/flutter_build/7aff818252151f3e8f767ffc59f6ba41/debug_ios_bundle_flutter_assets.stamp
-.dart_tool/flutter_build/7aff818252151f3e8f767ffc59f6ba41/flutter_assets.d
-.dart_tool/flutter_build/7aff818252151f3e8f767ffc59f6ba41/kernel_snapshot.d
-.dart_tool/flutter_build/7aff818252151f3e8f767ffc59f6ba41/kernel_snapshot.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/_composite.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/.filecache
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/android_aot_bundle_release_android-arm.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/android_aot_bundle_release_android-arm64.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/android_aot_bundle_release_android-x64.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/android_aot_release_android-arm.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/android_aot_release_android-arm64.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/android_aot_release_android-x64.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/aot_android_asset_bundle.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/app.dill
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/flutter_assets.d
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/kernel_snapshot.d
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/kernel_snapshot.stamp
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/outputs.json
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/arm64-v8a/app.so
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/armeabi-v7a/app.so
-.dart_tool/flutter_build/cd359f5e441da2a975b93f9dc87de725/x86_64/app.so
-.dart_tool/flutter_build/fc638110320cbdb554f1bf6e384ad850/.filecache
-.dart_tool/flutter_build/fc638110320cbdb554f1bf6e384ad850/app.dill
-.dart_tool/flutter_build/fc638110320cbdb554f1bf6e384ad850/debug_android_application.stamp
-.dart_tool/flutter_build/fc638110320cbdb554f1bf6e384ad850/flutter_assets.d
-.dart_tool/flutter_build/fc638110320cbdb554f1bf6e384ad850/kernel_snapshot.d
-.dart_tool/flutter_build/fc638110320cbdb554f1bf6e384ad850/kernel_snapshot.stamp
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
