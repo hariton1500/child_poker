@@ -3,14 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginPageFB extends StatefulWidget {
-  const LoginPageFB({ Key key }) : super(key: key);
+  const LoginPageFB({Key key}) : super(key: key);
 
   @override
   _LoginPageFBState createState() => _LoginPageFBState();
 }
 
 class _LoginPageFBState extends State<LoginPageFB> {
-
   final AuthService _auth = AuthService();
   String _name = '';
 
@@ -18,7 +17,13 @@ class _LoginPageFBState extends State<LoginPageFB> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Детский бридж'),
+        title: Text('Вход в Детский бридж'),
+        actions: [
+          TextButton.icon(
+              onPressed: () {},
+              icon: Icon(Icons.person_add),
+              label: Text('Регистрация'))
+        ],
       ),
       body: Container(
         child: Center(
@@ -39,16 +44,19 @@ class _LoginPageFBState extends State<LoginPageFB> {
                   ),
                 ],
               ),
-              ElevatedButton(onPressed: () async {
-                dynamic result = await _auth.signInAnon();
-                if (result == null) print('error signing anon');
-                else {
-                  print('signed in by anon');
-                  print(result);
-                  User _user = result;
-                  //_user.displayName = _name;
-                }
-              }, child: Text('Enter...'))
+              ElevatedButton(
+                  onPressed: () async {
+                    dynamic result = await _auth.signInAnon();
+                    if (result == null)
+                      print('error signing anon');
+                    else {
+                      print('signed in by anon');
+                      print(result);
+                      User _user = result;
+                      //_user.displayName = _name;
+                    }
+                  },
+                  child: Text('Enter...'))
             ],
           ),
         ),
