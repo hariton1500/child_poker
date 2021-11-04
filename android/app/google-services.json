@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "913001925516",
+    "project_id": "child-poker",
+    "storage_bucket": "child-poker.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913001925516:android:8fd2c264547b899aee24a9",
+        "android_client_info": {
+          "package_name": "com.evpanet.childbridge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "913001925516-s8nsnglv1oshv3hbmbnflftk6mrjg6s0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1u5I1bsOyLCWMO8ZQ6bcZcL6hJTLf25Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "913001925516-s8nsnglv1oshv3hbmbnflftk6mrjg6s0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "913001925516-9g11eu41po3thqor5dvuiofo8i3j0nle.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.evpanet.childbridge"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

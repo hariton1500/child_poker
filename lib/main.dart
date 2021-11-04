@@ -1,7 +1,13 @@
-import 'package:childbridge/authorize.dart';
+//import 'package:childbridge/authorize.dart';
+import 'package:childbridge/authorizeScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() => runApp(new MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(new MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -13,7 +19,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: LoginPage('', null, null),
+      home: LoginPageFB()//LoginPage('', null, null),
     );
   }
 }
