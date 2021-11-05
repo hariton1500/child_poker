@@ -25,9 +25,17 @@ class AuthService {
     return _auth.authStateChanges();
   }
 
-  Future signInAnon() async {
+  Future updateName (String displayName) async {
+    try {
+      _auth.currentUser.updateDisplayName(displayName);
+    } catch (e) {
+    }
+  }
+
+  Future signInAnon(String name) async {
     try {
       UserCredential result = await _auth.signInAnonymously();
+      result.user.updateDisplayName(name);
       User user = result.user;
       return user;
     } catch (e) {

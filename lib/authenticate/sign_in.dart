@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginPageFB extends StatefulWidget {
-  const LoginPageFB({Key key}) : super(key: key);
+  LoginPageFB({Key key, this.toggle}) : super(key: key);
+  final Function toggle;
 
   @override
   _LoginPageFBState createState() => _LoginPageFBState();
@@ -20,9 +21,9 @@ class _LoginPageFBState extends State<LoginPageFB> {
         title: Text('Вход в Детский бридж'),
         actions: [
           TextButton.icon(
-              onPressed: () {},
-              icon: Icon(Icons.person_add),
-              label: Text('Регистрация'))
+              onPressed: () {widget.toggle();},
+              icon: Icon(Icons.person_add, color: Colors.white,),
+              label: Text('Регистрация', style: TextStyle(color: Colors.white),))
         ],
       ),
       body: Container(
@@ -46,7 +47,8 @@ class _LoginPageFBState extends State<LoginPageFB> {
               ),
               ElevatedButton(
                   onPressed: () async {
-                    dynamic result = await _auth.signInAnon();
+                    dynamic result = await _auth.signInAnon(_name);
+                    _auth.updateName(_name);
                     if (result == null)
                       print('error signing anon');
                     else {

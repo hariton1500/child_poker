@@ -16,7 +16,7 @@ class Wrapper extends StatelessWidget {
     if (user == null)
       return Authenticate();
     else {
-      String playerName = '???';
+      //String playerName = '???';
       return StartScreen(); //StartPage(playerName, null, null);
     }
   }

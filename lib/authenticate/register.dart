@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Register extends StatefulWidget {
-  const Register({Key key}) : super(key: key);
+  Register({Key key, this.toggle}) : super(key: key);
+  final Function toggle;
 
   @override
   _RegisterState createState() => _RegisterState();
@@ -17,16 +18,16 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Вход в Детский бридж'),
+        title: Text('Вход в Детский бридж', textAlign: TextAlign.left,),
         actions: [
           TextButton.icon(
-              onPressed: () {},
+              onPressed: () {widget.toggle();},
               icon: Icon(
-                Icons.person_add,
+                Icons.person,
                 color: Colors.white,
               ),
               label: Text(
-                'Вход',
+                'Вход', style: TextStyle(color: Colors.white),
               ))
         ],
       ),
@@ -51,7 +52,8 @@ class _RegisterState extends State<Register> {
               ),
               ElevatedButton(
                   onPressed: () async {
-                    dynamic result = await _auth.signInAnon();
+                    dynamic result = await _auth.signInAnon(_name);
+                    _auth.updateName(_name);
                     if (result == null)
                       print('error register anon');
                     else {

@@ -15,16 +15,18 @@ class _StartScreenState extends State<StartScreen> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
+    //user.updateDisplayName('anon');
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Детский бридж'),
+        title: Text(user.displayName ?? user.uid),
         actions: [
           TextButton.icon(
               onPressed: () {
                 _auth.signOut();
               },
-              icon: Icon(Icons.person_remove),
-              label: Text('Выход'))
+              icon: Icon(Icons.person, color: Colors.white,),
+              label: Text('Выход', style: TextStyle(color: Colors.white),))
         ],
       ),
       body: Container(),
