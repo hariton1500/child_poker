@@ -13,7 +13,7 @@ class _GamesListState extends State<GamesList> {
   @override
   Widget build(BuildContext context) {
 
-    final gamesList = Provider.of<List<Game>>(context);
+    final gamesList = Provider.of<List<Game>>(context) ?? [];
     print('[GamesList]');
     if (gamesList != null) gamesList.forEach((game) {
       print('${game.name}: ${game.owner}');
