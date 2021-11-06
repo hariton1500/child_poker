@@ -55,7 +55,7 @@ class _LoginPageFBState extends State<LoginPageFB> {
               ElevatedButton(
                   onPressed: () async {
                     dynamic result = await _auth.signInAnon(_name);
-                    _auth.updateName(_name);
+                    await _auth.updateName(_name);
                     if (result == null)
                       print('error signing anon');
                     else {

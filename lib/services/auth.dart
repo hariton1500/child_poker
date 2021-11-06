@@ -18,7 +18,7 @@ class AuthService {
   }
 
   GameUser _userFromUser(User user) {
-    return GameUser(name: user.displayName ?? '', owner: user.uid);
+    return GameUser(name: user.displayName ?? '', uid: user.uid);
   }
 
   Future updateName(String displayName) async {
@@ -30,10 +30,15 @@ class AuthService {
   Future signInAnon(String name) async {
     try {
       UserCredential result = await _auth.signInAnonymously();
-      result.user!.updateDisplayName(name);
+      print('[signInAnon]');
+      print(result);
+      await result.user!.updateDisplayName(name);
       User? user = result.user;
       return user;
+    } on FirebaseAuthException catch (e) {
+      print(e);
     } catch (e) {
+      print('error catched');
       print(e.toString());
       return null;
     }

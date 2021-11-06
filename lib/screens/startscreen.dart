@@ -1,8 +1,10 @@
+import 'package:childbridge/main.dart';
 import 'package:childbridge/models/game.dart';
+import 'package:childbridge/models/user.dart';
+import 'package:childbridge/screens/game_screen.dart';
 import 'package:childbridge/screens/games_list.dart';
 import 'package:childbridge/services/auth.dart';
 import 'package:childbridge/services/database.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,19 +19,18 @@ class _StartScreenState extends State<StartScreen> {
   final AuthService _auth = AuthService();
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User>(context);
-    //final games = Provider.of<Games>(context);
-    //user.updateDisplayName('anon');
-
+    final user = Provider.of<GameUser>(context);
+    //final games = Provider.of<List<Game>>(context);
     return StreamProvider<List<Game>>.value(
       catchError: (context, game) {
+        print('[startscreen] catchError');
         return [];
       },
       initialData: [],
       value: DatabaseService().games,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(user.displayName ?? user.uid),
+          title: Text(user.name),
           actions: [
             TextButton.icon(
                 onPressed: () {
@@ -48,17 +49,20 @@ class _StartScreenState extends State<StartScreen> {
         floatingActionButton: FloatingActionButton(
           //isExtended: true,
           child: Icon(Icons.games),
-          onPressed: () {
+          onPressed: () async {
+            var result = await DatabaseService().createGame(
+                gameName: '${user.name}\'s game',
+                gamer: user
+            );
+            print('[startscreen] $result');
             setState(() {
-              DatabaseService().createGame(
-                  gameName:
-                      '${user.displayName ?? user.uid.substring(1, 5)}s game',
-                  owner: user.uid);
             });
+            List<Game> games = await DatabaseService().gamesList;
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => GameScreen(game: games.last, gameUser: gameUser)));
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        body: GamesList(),
+        body: GamesList(gameUser: user),
       ),
     );
   }
