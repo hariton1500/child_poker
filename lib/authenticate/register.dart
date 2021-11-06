@@ -2,7 +2,7 @@ import 'package:childbridge/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class Register extends StatefulWidget {
-  Register({Key key, this.toggle}) : super(key: key);
+  Register({Key? key, required this.toggle}) : super(key: key);
   final Function toggle;
 
   @override

@@ -1,9 +1,14 @@
+import 'dart:ffi';
+
+import 'package:childbridge/models/user.dart';
 import 'package:childbridge/services/auth.dart';
 import 'package:childbridge/wrapper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+
+GameUser gameUser = GameUser(name: '', owner: '');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,9 +20,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<User>.value(
+    return StreamProvider<GameUser>.value(
       value: AuthService().user,
-      initialData: null,
+      initialData: gameUser,
       child: MaterialApp(
           title: 'Детский бридж',
           //theme: ThemeData(primarySwatch: Colors.blue,),

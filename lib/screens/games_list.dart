@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class GamesList extends StatefulWidget {
-  const GamesList({ Key key }) : super(key: key);
+  const GamesList({Key? key}) : super(key: key);
 
   @override
   _GamesListState createState() => _GamesListState();
@@ -12,17 +12,15 @@ class GamesList extends StatefulWidget {
 class _GamesListState extends State<GamesList> {
   @override
   Widget build(BuildContext context) {
-
-    final gamesList = Provider.of<List<Game>>(context) ?? [];
+    final gamesList = Provider.of<List<Game>>(context);
     print('[GamesList]');
-    if (gamesList != null) gamesList.forEach((game) {
+    gamesList.forEach((game) {
       print('${game.name}: ${game.owner}');
     });
 
     return ListView.builder(
       itemCount: gamesList.length,
       itemBuilder: (context, index) {
-
         return ListTile(
           title: Text(gamesList[index].name),
         );

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class StartScreen extends StatefulWidget {
-  const StartScreen({Key key}) : super(key: key);
+  const StartScreen({Key? key}) : super(key: key);
 
   @override
   _StartScreenState createState() => _StartScreenState();
@@ -22,8 +22,10 @@ class _StartScreenState extends State<StartScreen> {
     //user.updateDisplayName('anon');
 
     return StreamProvider<List<Game>>.value(
-      catchError: (context, game) {return [];},
-      initialData: null,
+      catchError: (context, game) {
+        return [];
+      },
+      initialData: [],
       value: DatabaseService().games,
       child: Scaffold(
         appBar: AppBar(
@@ -33,8 +35,14 @@ class _StartScreenState extends State<StartScreen> {
                 onPressed: () {
                   _auth.signOut();
                 },
-                icon: Icon(Icons.person, color: Colors.white,),
-                label: Text('Выход', style: TextStyle(color: Colors.white),))
+                icon: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  'Выход',
+                  style: TextStyle(color: Colors.white),
+                ))
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -42,10 +50,12 @@ class _StartScreenState extends State<StartScreen> {
           child: Icon(Icons.games),
           onPressed: () {
             setState(() {
-              DatabaseService().createGame(gameName: '${user.displayName ?? user.uid.substring(1, 5)}s game', owner: user.uid);
+              DatabaseService().createGame(
+                  gameName:
+                      '${user.displayName ?? user.uid.substring(1, 5)}s game',
+                  owner: user.uid);
             });
           },
-          
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: GamesList(),
