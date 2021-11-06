@@ -1,3 +1,4 @@
+import 'package:childbridge/models/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
@@ -12,22 +13,25 @@ class AuthService {
     }
   }
 
-  Stream<User> get user {
-    return _auth.authStateChanges();
+  Stream<GameUser> get user {
+    return _auth.authStateChanges().map((event) => _userFromUser(event!));
   }
 
-  Future updateName (String displayName) async {
+  GameUser _userFromUser(User user) {
+    return GameUser(name: user.displayName ?? '', owner: user.uid);
+  }
+
+  Future updateName(String displayName) async {
     try {
-      _auth.currentUser.updateDisplayName(displayName);
-    } catch (e) {
-    }
+      _auth.currentUser!.updateDisplayName(displayName);
+    } catch (e) {}
   }
 
   Future signInAnon(String name) async {
     try {
       UserCredential result = await _auth.signInAnonymously();
-      result.user.updateDisplayName(name);
-      User user = result.user;
+      result.user!.updateDisplayName(name);
+      User? user = result.user;
       return user;
     } catch (e) {
       print(e.toString());

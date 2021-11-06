@@ -2,7 +2,7 @@ import 'package:childbridge/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginPageFB extends StatefulWidget {
-  LoginPageFB({Key key, this.toggle}) : super(key: key);
+  LoginPageFB({Key? key, required this.toggle}) : super(key: key);
   final Function toggle;
 
   @override

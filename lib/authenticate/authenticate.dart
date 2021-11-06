@@ -3,14 +3,13 @@ import 'package:childbridge/authenticate/sign_in.dart';
 import 'package:flutter/widgets.dart';
 
 class Authenticate extends StatefulWidget {
-  const Authenticate({Key key}) : super(key: key);
+  const Authenticate({Key? key}) : super(key: key);
 
   @override
   _AuthenticateState createState() => _AuthenticateState();
 }
 
 class _AuthenticateState extends State<Authenticate> {
-
   bool isShowSign = true;
 
   void toggle() {
@@ -18,9 +17,15 @@ class _AuthenticateState extends State<Authenticate> {
       isShowSign = !isShowSign;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    return isShowSign ? LoginPageFB(toggle: toggle,) : Register(toggle: toggle,);
+    return isShowSign
+        ? LoginPageFB(
+            toggle: toggle,
+          )
+        : Register(
+            toggle: toggle,
+          );
   }
 }

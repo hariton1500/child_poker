@@ -17,16 +17,17 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-
   final state = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     print('game:init');
-    widget.subscription.onData((data) {handleMsg(data);});
+    widget.subscription.onData((data) {
+      handleMsg(data);
+    });
     super.initState();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     print('start:build');
@@ -39,78 +40,79 @@ class _StartPageState extends State<StartPage> {
         automaticallyImplyLeading: true,
         leading: IconButton(
           icon: Icon(Icons.help),
-          onPressed: (){state.currentState.openDrawer();},
+          onPressed: () {
+            state.currentState!.openDrawer();
+          },
         ),
       ),
       drawer: Drawer(
-        child: SafeArea(
-          child: Center(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: Uno().rules.length,
-              itemBuilder: (context, index) {
-                return Text(Uno().rules[index]);
-              },
-            )
-          )
-        )
-      ),
+          child: SafeArea(
+              child: Center(
+                  child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: Uno().rules.length,
+        itemBuilder: (context, index) {
+          return Text(Uno().rules[index]);
+        },
+      )))),
       body: Container(
-        alignment: Alignment.center,
-        color: Colors.blue,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            RaisedButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0)
-              ),
-              color: Colors.green,
-              textColor: Colors.white,
-              onPressed: _onFindGame,
-              child: Text('Найти игру')
-            ),
-            RaisedButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0)
-              ),
-              color: Colors.red,
-              textColor: Colors.white,
-              onPressed: _onCreateGame,
-              child: Text('Создать игру')
-            ),
-          ]
-        )
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Container(
+          alignment: Alignment.center,
           color: Colors.blue,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0)
-                ),
-                color: Colors.black,
-                textColor: Colors.white,
-                child: Text('Назад'),
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => LoginPage(widget.playerName, widget.subscription, widget.socket)))
-              )
-            ]
-          )
-        )
-      ),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                RaisedButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0)),
+                    color: Colors.green,
+                    textColor: Colors.white,
+                    onPressed: _onFindGame,
+                    child: Text('Найти игру')),
+                RaisedButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0)),
+                    color: Colors.red,
+                    textColor: Colors.white,
+                    onPressed: _onCreateGame,
+                    child: Text('Создать игру')),
+              ])),
+      bottomNavigationBar: SafeArea(
+          child: Container(
+              color: Colors.blue,
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RaisedButton(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0)),
+                        color: Colors.black,
+                        textColor: Colors.white,
+                        child: Text('Назад'),
+                        onPressed: () => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) => LoginPage(
+                                    widget.playerName,
+                                    widget.subscription,
+                                    widget.socket))))
+                  ]))),
     );
   }
 
   _onCreateGame() {
-    widget.socket.write(json.encode({'type' : 'createGame', 'name' : widget.playerName}));
+    widget.socket
+        .write(json.encode({'type': 'createGame', 'name': widget.playerName}));
   }
 
   _onFindGame() {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => GamesListPage(player: widget.playerName, subscription: widget.subscription, socket: widget.socket)));
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (BuildContext context) => GamesListPage(
+                player: widget.playerName,
+                subscription: widget.subscription,
+                socket: widget.socket)));
   }
 
   void handleMsg(List<int> data) {
@@ -122,10 +124,16 @@ class _StartPageState extends State<StartPage> {
         var msg = jsonDecode(element);
         print('decoded msg: $msg');
         if (msg['type'] == 'roomCreated') {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => RoomPage(player: widget.playerName, subscription: widget.subscription, socket: widget.socket, role: 'owner', gameName: widget.playerName, isContinue: false)));
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (BuildContext context) => RoomPage(
+                  player: widget.playerName,
+                  subscription: widget.subscription,
+                  socket: widget.socket,
+                  role: 'owner',
+                  gameName: widget.playerName,
+                  isContinue: false)));
         }
       }
     });
   }
-
 }
