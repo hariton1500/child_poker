@@ -1,5 +1,4 @@
 import 'package:childbridge/services/auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginPageFB extends StatefulWidget {
@@ -21,9 +20,17 @@ class _LoginPageFBState extends State<LoginPageFB> {
         title: Text('Вход в Детский бридж'),
         actions: [
           TextButton.icon(
-              onPressed: () {widget.toggle();},
-              icon: Icon(Icons.person_add, color: Colors.white,),
-              label: Text('Регистрация', style: TextStyle(color: Colors.white),))
+              onPressed: () {
+                widget.toggle();
+              },
+              icon: Icon(
+                Icons.person_add,
+                color: Colors.white,
+              ),
+              label: Text(
+                'Регистрация',
+                style: TextStyle(color: Colors.white),
+              ))
         ],
       ),
       body: Container(
@@ -54,7 +61,7 @@ class _LoginPageFBState extends State<LoginPageFB> {
                     else {
                       print('signed in by anon');
                       print(result);
-                      User _user = result;
+                      //User _user = result;
                       //_user.displayName = _name;
                     }
                   },

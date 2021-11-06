@@ -1,5 +1,4 @@
 import 'package:childbridge/services/auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Register extends StatefulWidget {
@@ -18,16 +17,22 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Вход в Детский бридж', textAlign: TextAlign.left,),
+        title: Text(
+          'Вход в Детский бридж',
+          textAlign: TextAlign.left,
+        ),
         actions: [
           TextButton.icon(
-              onPressed: () {widget.toggle();},
+              onPressed: () {
+                widget.toggle();
+              },
               icon: Icon(
                 Icons.person,
                 color: Colors.white,
               ),
               label: Text(
-                'Вход', style: TextStyle(color: Colors.white),
+                'Вход',
+                style: TextStyle(color: Colors.white),
               ))
         ],
       ),
@@ -59,7 +64,7 @@ class _RegisterState extends State<Register> {
                     else {
                       print('registered in by anon');
                       print(result);
-                      User _user = result;
+                      //User _user = result;
                       //_user.displayName = _name;
                     }
                   },

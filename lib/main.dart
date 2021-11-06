@@ -1,5 +1,3 @@
-//import 'package:childbridge/authorize.dart';
-import 'package:childbridge/authenticate/sign_in.dart';
 import 'package:childbridge/services/auth.dart';
 import 'package:childbridge/wrapper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
