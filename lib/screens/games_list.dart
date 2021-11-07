@@ -24,11 +24,9 @@ class _GamesListState extends State<GamesList> {
       itemCount: gamesToShow.length,
       itemBuilder: (context, index) {
         return ListTile(
-            leading: Text(gamesToShow[index].gamers.length.toString()),
+            //leading: Text(gamesToShow[index]..length.toString()),
             title: Text(gamesToShow[index].name),
-            subtitle: Column(
-              children: List.generate(gamesToShow[index].gamers.length, (i) => Text(gamesToShow[index].gamers[i].name)),
-            ),
+            //subtitle: Column(children: List.generate(gamesToShow[index].gamers.length, (i) => Text(gamesToShow[index].gamers[i].name)),),
             onTap:() {
               DatabaseService().enterToGame(gameName: gamesToShow[index].name, gamer: widget.gameUser);
             },

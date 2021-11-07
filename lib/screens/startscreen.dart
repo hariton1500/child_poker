@@ -27,7 +27,7 @@ class _StartScreenState extends State<StartScreen> {
         return [];
       },
       initialData: [],
-      value: DatabaseService().games,
+      value: DatabaseService().getGames(),
       child: Scaffold(
         appBar: AppBar(
           title: Text(user.name),
@@ -53,12 +53,12 @@ class _StartScreenState extends State<StartScreen> {
             var result = await DatabaseService().createGame(
                 gameName: '${user.name}\'s game',
                 gamer: user
-            );
+            ).then((gameRef) => DatabaseService()
+              .addGameTable(gameRef)
+                .then((gameTableRef) => Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => GameScreen(gameUser: gameUser, gameTableRef: gameTableRef)))));
             print('[startscreen] $result');
-            setState(() {
-            });
-            List<Game> games = await DatabaseService().gamesList;
-            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => GameScreen(game: games.last, gameUser: gameUser)));
+            //setState(() {});
+            //List<Game> games = await DatabaseService().gamesList;
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

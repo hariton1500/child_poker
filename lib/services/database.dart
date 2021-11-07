@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:childbridge/models/game.dart';
 import 'package:childbridge/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +8,7 @@ class DatabaseService {
   //collections
   final CollectionReference gamesCollection =
       FirebaseFirestore.instance.collection('games');
+  final _db = FirebaseFirestore.instance;
 
   Future<List<Game>> get gamesList async {
     var document = await gamesCollection.doc('games').get();
@@ -15,50 +18,27 @@ class DatabaseService {
     return games;
   }
   
-  Stream<List<Game>> get games {
-    return gamesCollection.snapshots().map<List<Game>>(_gamesFromQuerySnapshot);
+  Stream<List<Game>> getGames() {
+    return _db.collection('games')
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+      .map((doc) => Game.gamesFromJson(doc.data()))
+      .toList()
+    );
   }
 
-  //games list from QuerySnapshot
-  List<Game> _gamesFromQuerySnapshot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) {
-      String? name, owner, status;
-      List? gamers;
-      try {
-        name = doc.get('name');
-        print('name: $name');  
-      } catch (e) {
-        print('name: $e');
-      }
-      try {
-        owner = doc.get('owner');
-        print('owner: $owner');  
-      } catch (e) {
-        print('owner: $e');
-      }
-      try {
-        gamers = doc.get('gamers');
-        print('gamers: $gamers');  
-      } catch (e) {
-        print('gamers: $e');
-      }
-      try {
-        status = doc.get('status');
-        print('status: $status');  
-      } catch (e) {
-        print('status: e');
-      }
-      return Game(
-        name: name ?? '',
-        owner: owner ?? '',
-        status: status ?? '',
-        gamers: []
-      );//List.castFrom<Map, GameUser>(data['gamers'] ?? []));
-    }).toList();
-  }
-
-  Future createGame({required String gameName, required GameUser gamer}) async {
+  Future<DocumentReference<Map<String, dynamic>>> createGame({required String gameName, required GameUser gamer}) async {
     print('[createGame start]');
+    return _db.collection('games').add({
+          'name': gameName,
+          'owner': gamer.uid,
+          'gamers' : [{
+            'name' : gamer.name,
+            'uid': gamer.uid
+          }],
+          'status': 'created'
+        });
+    /*
     return await gamesCollection
         .doc(gameName)
         .set({
@@ -69,7 +49,11 @@ class DatabaseService {
             'uid': gamer.uid
           }],
           'status': 'created'
-        });
+        });*/
+  }
+
+  Future<DocumentReference<Map<String, dynamic>>> addGameTable(DocumentReference documentReference) {
+    return _db.collection(documentReference.toString()).add({});
   }
 
   Future enterToGame({required String gameName, required GameUser gamer}) async {
