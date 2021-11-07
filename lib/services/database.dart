@@ -32,10 +32,7 @@ class DatabaseService {
     return _db.collection('games').add({
           'name': gameName,
           'owner': gamer.uid,
-          'gamers' : [{
-            'name' : gamer.name,
-            'uid': gamer.uid
-          }],
+          'gamers' : 0,
           'status': 'created'
         });
     /*
